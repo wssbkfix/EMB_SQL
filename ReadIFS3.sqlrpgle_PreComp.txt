@@ -1,0 +1,347 @@
+Running Action: Create SQL ILE RPG Program (CRTSQLRPGI) (11:09:09 AM)
+Current library: WSSBKFIX21
+Library list: QTEMP QGPL GAMES400 YAJL LIBHTTP
+Working directory: /home/WSSBKFIX2
+Commands:
+	CRTSQLRPGI OBJ(WSSBKFIX21/ReadIFS3) SRCSTMF('/home/WSSBKFIX2/EmbSQL/ReadIFS3.sqlrpgle') CLOSQLCSR(*ENDMOD) OPTION(*EVENTF) DBGVIEW(*SOURCE) TGTRLS(*CURRENT) CVTCCSID(*JOB)
+
+CPC7301:  File QSQLTEMP1 created in library QTEMP.
+CPC7305:  Member READIFS3 added to file QSQLTEMP1 in QTEMP.
+CPI2119:  AUT and USRPRF parameter values were ignored.
+CPI2121:  Replaced object READIFS3 type *PGM was moved to QRPLOBJ.
+RNS9304:  Program READIFS3 placed in library WSSBKFIX21. 00 highest severity. Created on 05/31/24 at 18:09:22.
+CPC0904:  Data area RETURNCODE created in library QTEMP.
+  5770WDS V7R5M0  220415 RN        IBM ILE RPG             WSSBKFIX21/READIFS3      PUB400     05/31/24 18:09:22        Page      1
+   Command  . . . . . . . . . . . . :   CRTBNDRPG
+     Issued by  . . . . . . . . . . :     WSSBKFIX2
+   Program  . . . . . . . . . . . . :   READIFS3
+     Library  . . . . . . . . . . . :     WSSBKFIX21
+   Text 'description' . . . . . . . :   *SRCMBRTXT
+   Source stream file   . . . . . . :   /QSYS.LIB/QTEMP.LIB/QSQLTEMP1.FILE/READIFS3.MBR
+     CCSID  . . . . . . . . . . . . :     273
+   Text 'description' . . . . . . . :
+   Last Change  . . . . . . . . . . :   05/31/24  18:09:22
+   Generation severity level  . . . :   10
+   Default activation group . . . . :   *YES
+   Compiler options . . . . . . . . :   *XREF      *GEN       *NOSECLVL  *SHOWCPY
+                                        *EXPDDS    *EXT       *NOSHOWSKP *NOSRCSTMT
+                                        *DEBUGIO   *UNREF     *EVENTF
+   Debugging views  . . . . . . . . :   *ALL
+   Debug encryption key . . . . . . :   *NONE
+   Output . . . . . . . . . . . . . :   *PRINT
+   Optimization level . . . . . . . :   *NONE
+   Source listing indentation . . . :   *NONE
+   Type conversion options  . . . . :   *NONE
+   Sort sequence  . . . . . . . . . :   *JOB
+   Language identifier  . . . . . . :   *JOB
+   Replace program  . . . . . . . . :   *YES
+   User profile . . . . . . . . . . :   *USER
+   Authority  . . . . . . . . . . . :   *LIBCRTAUT
+   Truncate numeric . . . . . . . . :   *YES
+   Fix numeric  . . . . . . . . . . :   *NONE
+   Target release . . . . . . . . . :   V7R5M0
+   Allow null values  . . . . . . . :   *NO
+   Define condition names . . . . . :   *NONE
+   Enable performance collection  . :   *PEP
+   Profiling data . . . . . . . . . :   *NOCOL
+   Licensed Internal Code options . :
+   Generate program interface . . . :   *NO
+   Include directory  . . . . . . . :
+   Preprocessor options . . . . . . :   *NONE
+   Require prototype for export . . :   *NO
+                                                    -=* http://pub400.com *=-
+  5770WDS V7R5M0  220415 RN        IBM ILE RPG             WSSBKFIX21/READIFS3      PUB400     05/31/24 18:09:22        Page      2
+ Line   <---------------------- Source Specifications ----------------------------------------------------->  Do  Change Src Seq
+ Number ....+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8....+....9....+...10  Num Date   Id  Number
+                           S o u r c e   L i s t i n g
+      1 **free                                                                                                               000001
+      2 // program version                                                                                                   000002
+      3 // Service program for sql statements for the Show IFS utilities                                                     000003
+      4 //                                                                                                                   000004
+      5                                                                                                                      000005
+      6 dcl-ds fileOneValuesRec qualified ;                                                                                  000006
+      7   objectType            char(10) ;                                                                                   000007
+      8   fileText              char(50) ;                                                                                   000008
+      9   createTimeStamp       char(50) ;                                                                                   000009
+     10   objectChangeTimestamp char(50) ;                                                                                   000010
+     11   DaysUsedCount         char(50) ;                                                                                   000011
+     12   allocatedSize         char(50) ;                                                                                   000012
+     13 end-ds ;                                                                                                             000013
+     14 dcl-s wsOmitList char(200) inz('/home/WSSBKFIX2/web-node/  /home/WSSBKFIX2/web-node2/ +                              000014
+     15    /home/WSSBKFIX2/.npm /home/WSSBKFIX2/node_modules') ;                                                             000015
+     16                                                                                                                      000016
+     17 dcl-s fileValuePath char(100)  inz('/home/WSSBKFIX2/EmbSQL/ReadIFS11.rpgle ') ;                                      000017
+     18  dcl-s wkRecCnt int(10) ;                                                                                            000018
+     19                                                                                                                      000019
+     20  //--------------------------------------------------------------------                                              000020
+     21 // main entry  ;                                                                                                     000021
+     22 //--------------------------------------------------------------------                                               000022
+     23                                                                                                                      000023
+     24        /SET CCSID(*CHAR:*JOBRUNMIX)                                                                                  000024
+     25        // SQL COMMUNICATION AREA                                                //SQL                                000025
+     26        DCL-DS SQLCA;                                                            //SQL                                000026
+     27          SQLCAID CHAR(8) INZ(X'0000000000000000');                              //SQL                                000027
+     28           SQLAID CHAR(8) OVERLAY(SQLCAID);                                      //SQL                                000028
+     29          SQLCABC INT(10);                                                       //SQL                                000029
+     30           SQLABC BINDEC(9) OVERLAY(SQLCABC);                                    //SQL                                000030
+     31          SQLCODE INT(10);                                                       //SQL                                000031
+     32           SQLCOD BINDEC(9) OVERLAY(SQLCODE);                                    //SQL                                000032
+     33          SQLERRML INT(5);                                                       //SQL                                000033
+     34           SQLERL BINDEC(4) OVERLAY(SQLERRML);                                   //SQL                                000034
+     35          SQLERRMC CHAR(70);                                                     //SQL                                000035
+     36           SQLERM CHAR(70) OVERLAY(SQLERRMC);                                    //SQL                                000036
+     37          SQLERRP CHAR(8);                                                       //SQL                                000037
+     38           SQLERP CHAR(8) OVERLAY(SQLERRP);                                      //SQL                                000038
+     39          SQLERR CHAR(24);                                                       //SQL                                000039
+     40           SQLER1 BINDEC(9) OVERLAY(SQLERR:*NEXT);                               //SQL                                000040
+     41           SQLER2 BINDEC(9) OVERLAY(SQLERR:*NEXT);                               //SQL                                000041
+     42           SQLER3 BINDEC(9) OVERLAY(SQLERR:*NEXT);                               //SQL                                000042
+     43           SQLER4 BINDEC(9) OVERLAY(SQLERR:*NEXT);                               //SQL                                000043
+     44           SQLER5 BINDEC(9) OVERLAY(SQLERR:*NEXT);                               //SQL                                000044
+     45           SQLER6 BINDEC(9) OVERLAY(SQLERR:*NEXT);                               //SQL                                000045
+     46           SQLERRD INT(10) DIM(6) OVERLAY(SQLERR);                               //SQL                                000046
+     47          SQLWRN CHAR(11);                                                       //SQL                                000047
+     48           SQLWN0 CHAR(1) OVERLAY(SQLWRN:*NEXT);                                 //SQL                                000048
+     49           SQLWN1 CHAR(1) OVERLAY(SQLWRN:*NEXT);                                 //SQL                                000049
+     50           SQLWN2 CHAR(1) OVERLAY(SQLWRN:*NEXT);                                 //SQL                                000050
+     51           SQLWN3 CHAR(1) OVERLAY(SQLWRN:*NEXT);                                 //SQL                                000051
+                                                    -=* http://pub400.com *=-
+  5770WDS V7R5M0  220415 RN        IBM ILE RPG             WSSBKFIX21/READIFS3      PUB400     05/31/24 18:09:22        Page      3
+ Line   <---------------------- Source Specifications ----------------------------------------------------->  Do  Change Src Seq
+ Number ....+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8....+....9....+...10  Num Date   Id  Number
+     52           SQLWN4 CHAR(1) OVERLAY(SQLWRN:*NEXT);                                 //SQL                                000052
+     53           SQLWN5 CHAR(1) OVERLAY(SQLWRN:*NEXT);                                 //SQL                                000053
+     54           SQLWN6 CHAR(1) OVERLAY(SQLWRN:*NEXT);                                 //SQL                                000054
+     55           SQLWN7 CHAR(1) OVERLAY(SQLWRN:*NEXT);                                 //SQL                                000055
+     56           SQLWN8 CHAR(1) OVERLAY(SQLWRN:*NEXT);                                 //SQL                                000056
+     57           SQLWN9 CHAR(1) OVERLAY(SQLWRN:*NEXT);                                 //SQL                                000057
+     58           SQLWNA CHAR(1) OVERLAY(SQLWRN:*NEXT);                                 //SQL                                000058
+     59           SQLWARN CHAR(1) DIM(11) OVERLAY(SQLWRN);                              //SQL                                000059
+     60          SQLSTATE CHAR(5);                                                      //SQL                                000060
+     61           SQLSTT CHAR(5) OVERLAY(SQLSTATE);                                     //SQL                                000061
+     62        END-DS SQLCA;                                                            //SQL                                000062
+     63        DCL-PR SQLROUTE_CALL EXTPGM(SQLROUTE);                                   //SQL                                000063
+     64          CA LIKEDS(SQLCA);                                                      //SQL                                000064
+     65          *N BINDEC(4) OPTIONS(*NOPASS);                                         //SQL                                000065
+     66          *N CHAR(1) OPTIONS(*NOPASS);                                           //SQL                                000066
+     67        END-PR SQLROUTE_CALL;                                                    //SQL                                000067
+     68        DCL-PR SQLOPEN_CALL EXTPGM(SQLOPEN);                                     //SQL                                000068
+     69          CA LIKEDS(SQLCA);                                                      //SQL                                000069
+     70          *N BINDEC(4);                                                          //SQL                                000070
+     71        END-PR SQLOPEN_CALL;                                                     //SQL                                000071
+     72        DCL-PR SQLCLSE_CALL EXTPGM(SQLCLSE);                                     //SQL                                000072
+     73          CA LIKEDS(SQLCA);                                                      //SQL                                000073
+     74          *N BINDEC(4);                                                          //SQL                                000074
+     75        END-PR SQLCLSE_CALL;                                                     //SQL                                000075
+     76        DCL-PR SQLCMIT_CALL EXTPGM(SQLCMIT);                                     //SQL                                000076
+     77          CA LIKEDS(SQLCA);                                                      //SQL                                000077
+     78          *N BINDEC(4);                                                          //SQL                                000078
+     79        END-PR SQLCMIT_CALL;                                                     //SQL                                000079
+     80        /RESTORE CCSID(*CHAR)                                                                                         000080
+     81        DCL-C SQLROUTE CONST('QSYS/QSQROUTE');                                   //SQL                                000081
+     82        DCL-C SQLOPEN CONST('QSYS/QSQROUTE');                                    //SQL                                000082
+     83        DCL-C SQLCLSE CONST('QSYS/QSQLCLSE');                                    //SQL                                000083
+     84        DCL-C SQLCMIT CONST('QSYS/QSQLCMIT');                                    //SQL                                000084
+     85        DCL-C SQFRD CONST(2);                                                    //SQL                                000085
+     86        DCL-C SQFCRT CONST(8);                                                   //SQL                                000086
+     87        DCL-C SQFOVR CONST(16);                                                  //SQL                                000087
+     88        DCL-C SQFAPP CONST(32);                                                  //SQL                                000088
+     89 **END-FREE                                                                                                           000089
+ Line   <---------------------- Source Specifications ----------------------------><---- Comments ----> Do  Page  Change Src Seq
+ Number ....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8....+....9....+...10 Num Line  Date   Id  Number
+     90 D                 DS                                                       SELECT                                    000090
+     91 D  SQL_00000              1      2B 0 INZ(128)                             length of header                          000091
+     92 D  SQL_00001              3      4B 0 INZ(1)                               statement number                          000092
+     93 D  SQL_00002              5      8U 0 INZ(0)                               invocation mark                           000093
+     94 D  SQL_00003              9      9A   INZ('0') CCSID(*JOBRUNMIX)           data is okay                              000094
+     95 D  SQL_00004             10    128A   CCSID(*JOBRUNMIX)                    end of header                             000095
+     96 D  SQL_00005            129    228A   CCSID(*JOBRUNMIX)                    FILEVALUEPATH                             000096
+     97 D  SQL_00006            229    428A   CCSID(*JOBRUNMIX)                    WSOMITLIST                                000097
+     98 D  SQL_00007            429    438A   CCSID(*JOBRUNMIX)                    FILEONEVALUESREC.OBJ                      000098
+     99 D  SQL_00008            439    488A   CCSID(*JOBRUNMIX)                    FILEONEVALUESREC.FIL                      000099
+    100 D  SQL_00009            489    538A   CCSID(*JOBRUNMIX)                    FILEONEVALUESREC.CRE                      000100
+    101 D  SQL_00010            539    588A   CCSID(*JOBRUNMIX)                    FILEONEVALUESREC.OBJ                      000101
+    102 D  SQL_00011            589    638A   CCSID(*JOBRUNMIX)                    FILEONEVALUESREC.DAY                      000102
+    103 D  SQL_00012            639    688A   CCSID(*JOBRUNMIX)                    FILEONEVALUESREC.ALL                      000103
+                                                    -=* http://pub400.com *=-
+  5770WDS V7R5M0  220415 RN        IBM ILE RPG             WSSBKFIX21/READIFS3      PUB400     05/31/24 18:09:22        Page      4
+ Line   <---------------------- Source Specifications ----------------------------><---- Comments ----> Do  Page  Change Src Seq
+ Number ....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8....+....9....+...10 Num Line  Date   Id  Number
+ Line   <---------------------- Source Specifications ----------------------------------------------------->  Do  Change Src Seq
+ Number ....+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....8....+....9....+...10  Num Date   Id  Number
+    104 **FREE                                                                                                               000104
+    105 //*    exec sql                                                                                                      000105
+    106 //*     select                                                                                                       000106
+    107 //*       OBJECT_TYPE ,                                                                                              000107
+    108 //*       COALESCE(CAST(TEXT_DESCRIPTION AS CHAR(50)), ' ') AS DESC  ,                                               000108
+    109 //*       CAST(CREATE_TIMESTAMP AS CHAR(50)) AS CRTTMPS,                                                             000109
+    110 //*       CAST(OBJECT_CHANGE_TIMESTAMP AS CHAR(50)) AS CHGTMPS,                                                      000110
+    111 //*       COALESCE(CAST(DAYS_USED_COUNT AS CHAR(50)), '0') AS DAYUSEDCNT ,                                           000111
+    112 //*       CAST(ALLOCATED_SIZE AS CHAR(50))  AS ALLC                                                                  000112
+    113 //*       INTO :fileOneValuesRec                                                                                     000113
+    114 //*                                                                                                                  000114
+    115 //*       FROM TABLE(QSYS2.IFS_OBJECT_STATISTICS(START_PATH_NAME => TRIM(:fileValuePath) ,                           000115
+    116 //*                                            SUBTREE_DIRECTORIES => 'NO',                                          000116
+    117 //*                                            OMIT_LIST => TRIM(:wsOmitList) ))                                     000117
+    118 //*       LIMIT 1                                                                                                    000118
+    119 //*       ;                                                                                                          000119
+    120           SQL_00005 = FILEVALUEPATH;                                            //SQL                                000120
+    121           SQL_00006 = WSOMITLIST;                                               //SQL                                000121
+    122           SQLER6 = -4;                                                          //SQL 1                              000122
+    123           SQLROUTE_CALL(                                                        //SQL                                000123
+    124                SQLCA                                                            //SQL                                000124
+    125              : SQL_00000                                                        //SQL                                000125
+    126           );                                                                    //SQL                                000126
+    127           IF SQL_00003 = '1';                                                   //SQL                B01             000127
+    128           EVAL FILEONEVALUESREC.OBJECTTYPE = SQL_00007;                         //SQL                 01             000128
+    129           EVAL FILEONEVALUESREC.FILETEXT = SQL_00008;                           //SQL                 01             000129
+    130           EVAL FILEONEVALUESREC.CREATETIMESTAMP = SQL_00009;                    //SQL                 01             000130
+    131           EVAL FILEONEVALUESREC.OBJECTCHANGETIMESTAMP = SQL_00010;              //SQL                 01             000131
+    132           EVAL FILEONEVALUESREC.DAYSUSEDCOUNT = SQL_00011;                      //SQL                 01             000132
+    133           EVAL FILEONEVALUESREC.ALLOCATEDSIZE = SQL_00012;                      //SQL                 01             000133
+    134           ENDIF;                                                                //SQL                E01             000134
+    135                                                                                                                      000135
+    136 *inlr = *on ;                                                                                                        000136
+    137                                                                                                                      000137
+    138 return ;                                                                                                             000138
+    139                                                                                                                      000139
+        * * * * *   E N D   O F   S O U R C E   * * * * *
+                                                    -=* http://pub400.com *=-
+  5770WDS V7R5M0  220415 RN        IBM ILE RPG             WSSBKFIX21/READIFS3      PUB400     05/31/24 18:09:22        Page      5
+           A d d i t i o n a l   D i a g n o s t i c   M e s s a g e s
+  Msg id  Sv Number Seq     Message text
+  * * * * *   E N D   O F   A D D I T I O N A L   D I A G N O S T I C   M E S S A G E S   * * * * *
+                                                    -=* http://pub400.com *=-
+  5770WDS V7R5M0  220415 RN        IBM ILE RPG             WSSBKFIX21/READIFS3      PUB400     05/31/24 18:09:22        Page      6
+                           C r o s s   R e f e r e n c e
+       File and Record References:
+          File              Device             References (D=Defined)
+            Record
+          No references in the source.
+       Global Field References:
+          Field             Attributes         References (D=Defined M=Modified)
+          *INLR             N(1)                  136M
+          FILEONEVALUESREC  DS(260)                 6D    128M    129M    130M
+                                                  131M    132M    133M
+            ALLOCATEDSIZE   A(50)                  12D    133
+            CREATETIMESTAMP A(50)                   9D    130
+            DAYSUSEDCOUNT   A(50)                  11D    132
+            FILETEXT        A(50)                   8D    129
+            OBJECTCHANGETIMESTAMP...
+                            A(50)                  10D    131
+            OBJECTTYPE      A(10)                   7D    128
+          FILEVALUEPATH     A(100)                 17D    120
+ *RNF7031 SQFAPP            CONST                  88D
+ *RNF7031 SQFCRT            CONST                  86D
+ *RNF7031 SQFOVR            CONST                  87D
+ *RNF7031 SQFRD             CONST                  85D
+          SQL_00000         B(4,0)                 91D    125
+ *RNF7031 SQL_00001         B(4,0)                 92D
+ *RNF7031 SQL_00002         U(10,0)                93D
+          SQL_00003         A(1)                   94D    127
+ *RNF7031 SQL_00004         A(119)                 95D
+          SQL_00005         A(100)                 96D    120M
+          SQL_00006         A(200)                 97D    121M
+          SQL_00007         A(10)                  98D    128
+          SQL_00008         A(50)                  99D    129
+          SQL_00009         A(50)                 100D    130
+          SQL_00010         A(50)                 101D    131
+          SQL_00011         A(50)                 102D    132
+          SQL_00012         A(50)                 103D    133
+ *RNF7031 SQLABC            B(9,0)                 30D
+ *RNF7031 SQLAID            A(8)                   28D
+          SQLCA             DS(136)                26D     64      69      73
+                                                   77     124
+          SQLCABC           I(10,0)                29D     30
+          SQLCAID           A(8)                   27D     28
+          SQLCLSE           CONST                  72      83D
+ *RNF7031 SQLCLSE_CALL      PROTOTYPE              72D
+          SQLCMIT           CONST                  76      84D
+ *RNF7031 SQLCMIT_CALL      PROTOTYPE              76D
+ *RNF7031 SQLCOD            B(9,0)                 32D
+          SQLCODE           I(10,0)                31D     32
+ *RNF7031 SQLERL            B(4,0)                 34D
+ *RNF7031 SQLERM            A(70)                  36D
+ *RNF7031 SQLERP            A(8)                   38D
+          SQLERR            A(24)                  39D     40      41      42
+                                                   43      44      45      46
+ *RNF7031 SQLERRD(6)        I(10,0)                46D
+                                                    -=* http://pub400.com *=-
+  5770WDS V7R5M0  220415 RN        IBM ILE RPG             WSSBKFIX21/READIFS3      PUB400     05/31/24 18:09:22        Page      7
+          SQLERRMC          A(70)                  35D     36
+          SQLERRML          I(5,0)                 33D     34
+          SQLERRP           A(8)                   37D     38
+ *RNF7031 SQLER1            B(9,0)                 40D
+ *RNF7031 SQLER2            B(9,0)                 41D
+ *RNF7031 SQLER3            B(9,0)                 42D
+ *RNF7031 SQLER4            B(9,0)                 43D
+ *RNF7031 SQLER5            B(9,0)                 44D
+          SQLER6            B(9,0)                 45D    122M
+          SQLOPEN           CONST                  68      82D
+ *RNF7031 SQLOPEN_CALL      PROTOTYPE              68D
+          SQLROUTE          CONST                  63      81D
+          SQLROUTE_CALL     PROTOTYPE              63D    123M
+          SQLSTATE          A(5)                   60D     61
+ *RNF7031 SQLSTT            A(5)                   61D
+ *RNF7031 SQLWARN(11)       A(1)                   59D
+ *RNF7031 SQLWNA            A(1)                   58D
+ *RNF7031 SQLWN0            A(1)                   48D
+ *RNF7031 SQLWN1            A(1)                   49D
+ *RNF7031 SQLWN2            A(1)                   50D
+ *RNF7031 SQLWN3            A(1)                   51D
+ *RNF7031 SQLWN4            A(1)                   52D
+ *RNF7031 SQLWN5            A(1)                   53D
+ *RNF7031 SQLWN6            A(1)                   54D
+ *RNF7031 SQLWN7            A(1)                   55D
+ *RNF7031 SQLWN8            A(1)                   56D
+ *RNF7031 SQLWN9            A(1)                   57D
+          SQLWRN            A(11)                  47D     48      49      50
+                                                   51      52      53      54
+                                                   55      56      57      58
+                                                   59
+ *RNF7031 WKRECCNT          I(10,0)                18D
+          WSOMITLIST        A(200)                 14D    121
+       Indicator References:
+          Indicator                            References (D=Defined M=Modified)
+          LR                                      136M
+        * * * * *   E N D   O F   C R O S S   R E F E R E N C E   * * * * *
+                                                    -=* http://pub400.com *=-
+  5770WDS V7R5M0  220415 RN        IBM ILE RPG             WSSBKFIX21/READIFS3      PUB400     05/31/24 18:09:22        Page      8
+                       E x t e r n a l   R e f e r e n c e s
+       Statically bound procedures:
+          Procedure                            References
+          No references in the source.
+       Imported fields:
+          Field             Attributes         Defined
+          No references in the source.
+       Exported fields:
+          Field             Attributes         Defined
+          No references in the source.
+    * * * * *   E N D   O F   E X T E R N A L   R E F E R E N C E S   * * * * *
+                                                    -=* http://pub400.com *=-
+  5770WDS V7R5M0  220415 RN        IBM ILE RPG             WSSBKFIX21/READIFS3      PUB400     05/31/24 18:09:22        Page      9
+                           M e s s a g e   S u m m a r y
+  Msg id  Sv Number Message text
+ *RNF7031 00     36 The name or indicator is not referenced.
+        * * * * *   E N D   O F   M E S S A G E   S U M M A R Y   * * * * *
+                                                    -=* http://pub400.com *=-
+  5770WDS V7R5M0  220415 RN        IBM ILE RPG             WSSBKFIX21/READIFS3      PUB400     05/31/24 18:09:22        Page     10
+                             F i n a l   S u m m a r y
+   Message Totals:
+     Information  (00) . . . . . . . :       36
+     Warning      (10) . . . . . . . :        0
+     Error        (20) . . . . . . . :        0
+     Severe Error (30+)  . . . . . . :        0
+     ---------------------------------  -------
+     Total . . . . . . . . . . . . . :       36
+   Source Totals:
+     Records . . . . . . . . . . . . :      139
+     Specifications  . . . . . . . . :      105
+     Data records  . . . . . . . . . :        0
+     Comments  . . . . . . . . . . . :       29
+          * * * * *   E N D   O F   F I N A L   S U M M A R Y   * * * * *
+ Program READIFS3 placed in library WSSBKFIX21. 00 highest severity. Created on 05/31/24 at 18:09:22.
+           * * * * *   E N D   O F   C O M P I L A T I O N   * * * * *
+                                                    -=* http://pub400.com *=-
+
+Fetching errors for WSSBKFIX21/READIFS3.
