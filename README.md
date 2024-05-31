@@ -20,5 +20,62 @@ The program I coded was in free form. (Why you code any other way!!). I kept it 
 2  The Table function QSYS2.IFS_OBJECT_STATISTICS. This function reads the attributes of a stream file in the IFS. 
    There a three parameters in the table function which are self explanatory. In this case I wanted a specific file: specified in the START_PATH_NAME. I did not want any subfolders so a NO is spefied after SUBTREE_DIRECTORIES. The OMIT_LIST is included because I have
    a lot of node.js files I want to avoid. The result should be a view of the attributes of just one file that is specified in the fileValuePath variable. 
-## Compare the original code to the pre-compile code. 
+## A view of the compiler listing 
 There are two ways to see this. The first is covered here. One just needs to look at the generated compiler listing. This can be done if the pre-compile does not fail. 
+
+A compiler listing has been supplied ReadIFS3.sqlrpgle_PreComp.txt. You view this file. I recommend viewing it raw to remove the extra line numbers. All of the source is line numbered already. The review of the source is in the following parts. 
+1- Variable and data structure definitions 
+2- Prototype definitions. 
+3- Constant definitions 
+4- Calculation spects. 
+
+### variable and data structure definition 
+If you scroll down to the first page of the compiler list (see sample below )
+
+     20  //--------------------------------------------------------------------                                           
+     21 // main entry  ;                                                                                                  
+     22 //--------------------------------------------------------------------                                            
+     23                                                                                                                   
+     24        /SET CCSID(*CHAR:*JOBRUNMIX)                                                                               
+     25        // SQL COMMUNICATION AREA                                                //SQL                             
+     26        DCL-DS SQLCA;                                                            //SQL                             
+     27          SQLCAID CHAR(8) INZ(X'0000000000000000');                              //SQL                             
+     28           SQLAID CHAR(8) OVERLAY(SQLCAID);                                      //SQL                             
+     29          SQLCABC INT(10);                                                       //SQL                             
+     30           SQLABC BINDEC(9) OVERLAY(SQLCABC);                                    //SQL                             
+     31          SQLCODE INT(10);                                                       //SQL                             
+
+
+From source line 24 to source line 79 the SQLCA data structure is defined. 
+
+Then lines 91 to 103 have a unlabled data structure. Don't know why IBM went away from free format here but the did. At least the documented each field. The data structure is used to store the sql statement and have place holders for the fields retrieved. Note that the comments for SQL_00007 through SQL_00012  match field names in the data structure after the INTO clause of the select statement. 
+After that, lines 81 through 88 defined the constants. 
+
+Lines 81 through 88 have the constants. 
+
+### calculation specs 
+Two variables are populated, SQL_00005 and SQL00006. These are the host variable values. There ae only two values passed by parameter, SQL_00001 (Length of header), and the SQLCA). This means not all values are passed via parameters. Perhaps base pointers are used sinc the address is known of the data structure because the SQL_00000 is passed. 
+
+Because of the Constaints, actual program called is 'QSYS/QSQROUTE'. You can find that program and display it's attributes.  
+
+The calculations specs. 
+Lines 
+
+    120           SQL_00005 = FILEVALUEPATH;                                            //SQL      
+    121           SQL_00006 = WSOMITLIST;                                               //SQL     
+    122           SQLER6 = -4;                                                          //SQL  
+    123           SQLROUTE_CALL(                                                        //SQL  
+    124                SQLCA                                                            //SQL   
+    125              : SQL_00000                                                        //SQL    
+    126           );                        
+
+### making it easier 
+You may have noticed that all of the generated code has //SQL at the end of each line. You can use a find function to get all of the generated code. As you probably already noticed, the code that was disabled has the "//" in the first columns. With RDI or Visual Studio Code this makes those lines stand out. 
+
+### Final notes on the compiler listing
+You may wonder if you can just go ahead and compile this. I did not have any luck with it, but there is another approach that will give us a pre-compile source that can be compiled. 
+
+# Running the precompiiler without a compile 
+
+
+
