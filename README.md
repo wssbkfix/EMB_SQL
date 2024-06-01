@@ -76,6 +76,44 @@ You may have noticed that all of the generated code has //SQL at the end of each
 You may wonder if you can just go ahead and compile this. I did not have any luck with it, but there is another approach that will give us a pre-compile source that can be compiled. 
 
 # Running the precompiiler without a compile 
+An alternate way to look at what the pre-compiled code is to use the CRTSQLRPGI command with the *NOGEN option. This will create the code with the SQL commands in it but not compile it. Once you have that pre-compiler codec, you can run the CRTBNDRPG command to generate the RPG program. 
+The steps again are
+1- compile the original code with the *NOGEN option (example below) 
+2- Go to the created pre-compiler code (in QTEMP/QSQLRPG  
+3- Compile the pre-compiler code. 
+
+detail of steps 
+## 1-Compile the original code
+Use the following compile command 
+ CRTSQLRPGI OBJ(READIFS3) SRCSTMF('/home/WSSBKFIX2/EmbSQL/ReadIFS3.sqlrpgle
+') OPTION(*NOGEN)            
+
+You will need to change the SRCSTMF parameter to meet you own file needs. 
+The OPTION parameter is set to *NOGEN. The *NOGEN option tells the compiler to just produce pre-compiler code but not to compile it. If you take the the defauls, then the code goes into the QTEMP/QSQLTEMP1 file in the ReadIFS3 member or whatever source member you are working with.  There is a TOSRCFILE parameter and you can direct the member whereever you want. 
+
+Take a look at the pre-compile code. If you wanted to experiment, you could remove all but the necessary components. You could use it on your own code and see how a insert or update would work. 
+
+## 2-Check out the pre-compiled code.
+Note what is remarked out, and what is added.  
+Note that a dynamic call is made. This is not a call to a procedure in a service program. 
+
+## 3- Compile the pre-compiler code. 
+You will use the CRTBNDRPG command to compile the pre-compiler code. This will result in an executable program. If you want to debug the program, make sure you set the debug view parameer correctly. 
+
+I did not use a cursor and I' m not updating or inserting any records. This means commitment control settings don't come into play, but they obviously would if you are doing a update,insert, or update operation. 
+
+I know this works because I put the program in debug mode and whatched the variables populate. If you do this, I would take note of the SQL_0000... variables. Note that SQL_00003 is set to 0 but if it is changed to one, that means success. 
+
+## notes
+Commitment control is not used so the compiler settings in this case do not have any impact. 
+
+## Observations
+I would not recommend developing code using this approach. Let the pre-compiler do its job. It is a positive to know what is going on. Also, if you get the nasty variable un-defined or not usable, the you are stuck with a listing showing just the error and nothing else. In this case you could use the *NOGEN option and the complile the pre-comiler code. You would at least get a full listing. 
+
+
+
+
+
 
 
 
